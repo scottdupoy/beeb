@@ -4,6 +4,7 @@ require 'json'
 class Accessor
 
     def get_programme pid
+
         json = download_json 'http://www.bbc.co.uk/programmes/' + pid + '.json'
         if json.nil?
             puts "ERROR: could not download json for " + pid
@@ -30,10 +31,22 @@ private
     def get_segments pid
     
         json = download_json 'http://www.bbc.co.uk/programmes/' + pid + '/segments.json'
+        segment_events = json["segment_events"]
+        segments = Array.new
 
-        #todo
+        segment_events.each do |segment_event|
+            segment_details = segment_event["segment"]
+            segment = Segment.new
+            segment.segment_title = segment_event["title"]
+            segment.position = segment_event["position"]
+            segment.pid = segment_details["pid"]
+            segment.artist = segment_details["artist"]
+            segment.title = segment_details["track_title"]
+            segment.record_label = segment_details["record_label"]
+            segments.push segment
+        end
 
-        return Array.new
+        return segments
     end
 
     def download_json url
