@@ -14,8 +14,12 @@ class Accessor
         data = json["programme"]
         programme = Programme.new
         programme.pid = data["pid"]
-        programme.previous_pid = data["peers"]["previous"]["pid"]
-        programme.next_pid = data["peers"]["next"]["pid"]
+        if not data["peers"]["previous"].nil?
+            programme.previous_pid = data["peers"]["previous"]["pid"]
+        end
+        if not data["peers"]["next"].nil?
+            programme.next_pid = data["peers"]["next"]["pid"]
+        end
         programme.title = data["display_title"]["title"]
         programme.sub_title = data["display_title"]["subtitle"]
         programme.short_synopsis = data["short_synopsis"]
@@ -29,11 +33,14 @@ class Accessor
 private
 
     def get_segments pid
-    
-        json = download_json 'http://www.bbc.co.uk/programmes/' + pid + '/segments.json'
-        segment_events = json["segment_events"]
         segments = Array.new
+        json = download_json 'http://www.bbc.co.uk/programmes/' + pid + '/segments.json'
+        if json.nil?
+            # couldn't access data which probably means there isn't any
+            return segments
+        end
 
+        segment_events = json["segment_events"]
         segment_events.each do |segment_event|
             segment_details = segment_event["segment"]
             segment = Segment.new
@@ -58,7 +65,10 @@ private
                 return JSON.parse response.body            
             elsif response.kind_of? Net::HTTPRedirection
                 current_url = response['location']
-                puts "WARN: Redirecting to " + current_url
+                #puts "WARN: Redirecting to " + current_url
+            elsif response.kind_of? Net::HTTPNotFound
+                # 404
+                return nil 
             else
                 puts "ERROR: problem downloading url"
                 puts "  url:  " + url

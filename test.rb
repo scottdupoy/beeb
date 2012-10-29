@@ -5,7 +5,7 @@ require './segment.rb'
 require './programme.rb'
 
 accessor = Accessor.new
-programme = accessor.get_programme 'b017l8jv'
+programme = accessor.get_programme 'b01hjbtc'
 
 if not programme.nil?
     puts "programme.pid:             " + programme.pid
@@ -26,7 +26,7 @@ if not programme.nil?
         puts "    position:      " + segment.position.to_s
         puts "    artist:        " + segment.artist
         puts "    title:         " + segment.title
-        puts "    record_label:  " + segment.record_label
+        puts "    record_label:  " + (segment.record_label.nil? ? "Unknown" : segment.record_label)
         puts
     end
 end
